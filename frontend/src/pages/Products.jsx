@@ -36,6 +36,7 @@ function Products() {
     setQuantity(product.quantity);
   };
 
+
   const addProduct = async () => {
     try {
       if (!name || !description || !price || !quantity) {
@@ -100,7 +101,31 @@ if (price <= 0 || quantity <= 0) {
       console.error(error);
     }
   };
+const addToCart = async (product) => {
 
+    try {
+
+        await axios.post(
+            "http://localhost:8081/api/cart",
+            {
+
+                productName: product.name,
+
+                price: product.price,
+
+                quantity: 1
+            }
+        );
+
+        toast.success("Added To Cart");
+
+    } catch (error) {
+
+        console.error(error);
+
+        toast.error("Failed To Add Cart");
+    }
+};
   const deleteProduct = async (id) => {
     try {
       await axios.delete(`http://localhost:8081/api/products/${id}`);
@@ -161,6 +186,8 @@ if (price <= 0 || quantity <= 0) {
   editProduct={editProduct}
 
   deleteProduct={deleteProduct}
+
+  addToCart={addToCart}
 />
           ))}
         </div>

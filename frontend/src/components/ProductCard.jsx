@@ -4,7 +4,9 @@ function ProductCard({
 
     editProduct,
 
-    deleteProduct
+    deleteProduct,
+
+    addToCart
 
 }) {
 
@@ -35,6 +37,12 @@ function ProductCard({
                 Edit
             </button>
 
+<button
+    onClick={() => addToCart(product)}
+    className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg mt-5 mr-3"
+>
+    Add To Cart
+</button>
             <button
                 onClick={() => deleteProduct(product.id)}
                 className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg mt-5"
