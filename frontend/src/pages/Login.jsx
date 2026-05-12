@@ -1,64 +1,79 @@
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function Login() {
+  const navigate = useNavigate();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const handleLogin = async () => {
+    try {
+      if (!email || !password) {
+        toast.error("All fields are required");
 
-    const handleLogin = async () => {
+        return;
+      }
+      setLoading(true);
+      const response = await axios.post(
+        "http://localhost:8081/api/auth/login",
+        {
+          email,
+          password,
+        },
+      );
 
-        try {
+      localStorage.setItem("token", response.data);
 
-            const response = await axios.post(
-                "http://localhost:8081/api/auth/login",
-                {
-                    email,
-                    password
-                }
-            );
+      toast.success("Login Successful");
 
-            localStorage.setItem("token", response.data);
+      console.log(response.data);
 
-            alert("Login Successful");
+      navigate("/products");
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
 
-            console.log(response.data);
+      toast.error("Invalid Credentials");
+      setLoading(false);
+    }
+  };
 
-        } catch (error) {
+  return (
+    <div>
+      <h1>AI Ecommerce Login</h1>
 
-            console.error(error);
+      <input
+        type="email"
+        placeholder="Enter Email"
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-            alert("Login Failed");
-        }
-    };
+      <br />
+      <br />
 
-    return (
-        <div>
+      <input
+        type="password"
+        placeholder="Enter Password"
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-            <h1>AI Ecommerce Login</h1>
+      <br />
+      <br />
 
-            <input
-                type="email"
-                placeholder="Enter Email"
-                onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <br /><br />
-
-            <input
-                type="password"
-                placeholder="Enter Password"
-                onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <br /><br />
-
-            <button onClick={handleLogin}>
-                Login
-            </button>
-
-        </div>
-    );
+      <button onClick={handleLogin} disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
+      <p className="mt-5">
+        Don't have account?
+        <Link to="/register" className="text-blue-400 ml-2">
+          Register
+        </Link>
+      </p>
+    </div>
+  );
 }
 
 export default Login;

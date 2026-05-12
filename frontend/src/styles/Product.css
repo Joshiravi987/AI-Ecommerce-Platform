@@ -1,0 +1,17 @@
+.page-title {
+
+    color: #60a5fa;
+
+    font-size: 40px;
+
+    font-weight: bold;
+}
+
+.product-card {
+
+    background-color: #111827;
+
+    padding: 20px;
+
+    border-radius: 15px;
+}

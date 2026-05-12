@@ -1,8 +1,17 @@
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import "../styles/Product.css";
+import Navbar from "../components/Navbar";
+import ProductCard from "../components/ProductCard";
+import ProductForm from "../components/ProductForm";
+import {toast} from "react-toastify";
+
 
 function Products() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [editing, setEditing] = useState(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -19,8 +28,29 @@ function Products() {
     }
   };
 
+  const editProduct = (product) => {
+    setEditing(product.id);
+    setName(product.name);
+    setDescription(product.description);
+    setPrice(product.price);
+    setQuantity(product.quantity);
+  };
+
   const addProduct = async () => {
     try {
+      if (!name || !description || !price || !quantity) {
+
+    toast.error("All fields are required");
+
+    return;
+}
+
+if (price <= 0 || quantity <= 0) {
+
+    toast.error("Price and quantity must be greater than 0");
+
+    return;
+}
       await axios.post("http://localhost:8081/api/products", {
         name,
         description,
@@ -28,7 +58,42 @@ function Products() {
         quantity,
       });
 
-      alert("Product Added");
+     toast.success("Product Added Successfully");
+
+      fetchProducts();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateProduct = async () => {
+    try {
+      if (!name || !description || !price || !quantity) {
+
+    toast.error("All fields are required");
+
+    return;
+}
+if (price <= 0 || quantity <= 0) {
+
+    toast.error("Price and quantity must be greater than 0");
+
+    return;
+}
+      await axios.put(`http://localhost:8081/api/products/${editing}`, {
+        name,
+        description,
+        price,
+        quantity,
+      });
+
+      toast.success("Product Updated Successfully");
+
+      setEditing(null);
+      setName("");
+      setDescription("");
+      setPrice("");
+      setQuantity("");
 
       fetchProducts();
     } catch (error) {
@@ -40,12 +105,18 @@ function Products() {
     try {
       await axios.delete(`http://localhost:8081/api/products/${id}`);
 
+      toast.success("Product Deleted Successfully");
       fetchProducts();
     } catch (error) {
       console.error(error);
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -54,79 +125,43 @@ function Products() {
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Navbar */}
 
-      <div className="bg-black p-5 shadow-lg flex justify-between">
-        <h1 className="text-3xl font-bold text-blue-400">AI Ecommerce</h1>
-
-        <button className="bg-red-500 px-4 py-2 rounded-lg">Logout</button>
-      </div>
+      <Navbar handleLogout={handleLogout} />
 
       {/* Add Product Form */}
 
       <div className="p-8">
-        <div className="bg-gray-900 p-6 rounded-xl shadow-lg max-w-md">
-          <h2 className="text-2xl mb-4 font-bold">Add Product</h2>
+        <ProductForm
+  name={name}
+  setName={setName}
 
-          <input
-            type="text"
-            placeholder="Product Name"
-            className="w-full p-3 mb-3 rounded bg-gray-800"
-            onChange={(e) => setName(e.target.value)}
-          />
+  description={description}
+  setDescription={setDescription}
 
-          <input
-            type="text"
-            placeholder="Description"
-            className="w-full p-3 mb-3 rounded bg-gray-800"
-            onChange={(e) => setDescription(e.target.value)}
-          />
+  price={price}
+  setPrice={setPrice}
 
-          <input
-            type="number"
-            placeholder="Price"
-            className="w-full p-3 mb-3 rounded bg-gray-800"
-            onChange={(e) => setPrice(e.target.value)}
-          />
+  quantity={quantity}
+  setQuantity={setQuantity}
 
-          <input
-            type="number"
-            placeholder="Quantity"
-            className="w-full p-3 mb-3 rounded bg-gray-800"
-            onChange={(e) => setQuantity(e.target.value)}
-          />
+  editing={editing}
 
-          <button
-            onClick={addProduct}
-            className="bg-blue-500 hover:bg-blue-600 px-5 py-3 rounded-lg w-full"
-          >
-            Add Product
-          </button>
-        </div>
+  addProduct={addProduct}
+  updateProduct={updateProduct}
+/>
 
         {/* Product Cards */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
           {products.map((product) => (
-            <div
-              key={product.id}
-              className="bg-gray-900 p-5 rounded-xl shadow-lg"
-            >
-              <h2 className="text-2xl font-bold text-blue-400">
-                {product.name}
-              </h2>
+           <ProductCard
+  key={product.id}
 
-              <p className="mt-3 text-gray-300">{product.description}</p>
+  product={product}
 
-              <p className="mt-3">₹ {product.price}</p>
+  editProduct={editProduct}
 
-              <p>Stock: {product.quantity}</p>
-
-              <button
-                onClick={() => deleteProduct(product.id)}
-                className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg mt-5"
-              >
-                Delete
-              </button>
-            </div>
+  deleteProduct={deleteProduct}
+/>
           ))}
         </div>
       </div>
